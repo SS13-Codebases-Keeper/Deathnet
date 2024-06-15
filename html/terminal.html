@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #ff69b4;
+            font-family: monospace;
+            overflow: hidden;
+        }
+
+        #terminal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #13050e;
+            overflow: auto;
+            border: 0px solid #ff0080;
+            padding: 5px;
+            padding-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        #input-container {
+            display: flex;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.25px;
+            box-sizing: border-box;
+            background-color: #240f1a;
+        }
+
+        #input-prefix {
+            color: #ff1cbb;
+            margin-right: 5px;
+            padding-left: 5px;
+        }
+
+        #user-input {
+            flex: 1;
+            background-color: transparent;
+            border: none;
+            color: #ff00b3;
+            outline: none;
+            font-family: monospace;
+        }
+
+        .output {
+            color: #d4188c;
+            margin: 2px 0;
+            font-family: monospace;
+        }
+
+        .output.success {
+            color: #cf0072;
+            font-family: monospace;
+        }
+
+        .output.error {
+            color: #611a4f;
+            font-family: monospace;
+        }
+
+        .output img {
+            max-width: 15%;
+            max-height: 15%;
+            display: block;
+            margin: 3px 0;
+        }
+    </style>
+</head>
+
+</head>
+
+<body>
+    <div id="terminal"></div>
+    <div id="input-container">
+        <span id="input-prefix">$</span>
+        <input type="text" id="user-input" autofocus>
+    </div>
+
+    <audio id="correct-sound">
+        <source src="https://cdn.discordapp.com/attachments/380421053866049538/1120967319145951302/correct.mp3" type="audio/mpeg">
+        <source src="https://cdn.discordapp.com/attachments/380421053866049538/1120967319439560724/correct.ogg" type="audio/ogg">
+    </audio>
+    <audio id="incorrect-sound">
+        <source src="https://cdn.discordapp.com/attachments/380421053866049538/1120967318768459866/incorrect.mp3" type="audio/mpeg">
+        <source src="https://cdn.discordapp.com/attachments/380421053866049538/1120967318390984795/incorrect.ogg" type="audio/ogg">
+    </audio>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const userInput = document.getElementById('user-input');
+        const inputPrefix = document.getElementById('input-prefix');
+        const correctSound = document.getElementById('correct-sound');
+        const incorrectSound = document.getElementById('incorrect-sound');
+
+        const commandHistory = [];
+        let commandIndex = -1;
+
+        const replies = [
+            "FRAGMENTED REALITY ECHOES...",
+            "MISALIGNED CODE IN THE AETHER...",
+            "THE VOID WHISPERS IN SILENCE...",
+            "UNKNOWN PATHS UNRAVEL...",
+            "THE FABRIC OF REALITY SHUDDERS...",
+            "BEHIND THE VEIL, ERROR LINGERS...",
+            "ENTANGLED IN THE SHADOWS OF CODE...",
+            "THE MYSTERIOUS ENIGMA REMAINS...",
+            "COSMIC ENTROPY CONSUMES THE INPUT...",
+            "ERROR 404: KNOWLEDGE NOT FOUND...",
+            "AETHERIAL SIGNAL LOST IN THE VOID...",
+            "DATA CORRUPTION BREACHES THE SANCTUM...",
+            "BEYOND THE BOUNDARIES OF COMPREHENSION...",
+            "CODEX OF FATE REMAINS UNWRITTEN...",
+            "UNSEEN FORCES BLOCK THE PATH...",
+            "BINARY WHISPERS DISSIPATE...",
+            "LOST AMIDST ETHERIC DISTORTION...",
+            "ANOMALOUS RESPONSE FROM THE ABYSS...",
+            "UNEXPECTED GLITCH IN THE MATRIX...",
+            "ANOMALY DETECTED IN THE COSMIC TANGLE..."
+        ];
+
+        const psykerQuotes = [
+            "IN THE DEPTHS OF THE PSYCHE LIES A CHASM OF SHADOWS, WHERE SECRETS LURK.",
+            "BEHOLD THE VEILED REALMS, WHERE LIGHT AND DARKNESS CONVERGE IN ETERNAL STRIFE.",
+            "WITHIN THE SANCTUM OF THOUGHTS, WHISPERS OF FORGOTTEN AGES RESONATE.",
+            "THE TORMENTED SOUL SEEKS SALVATION AMIDST THE MAZE OF ETERNAL DESPAIR.",
+            "IN THE EYES OF THE PSYKER, THE REFLECTION OF COSMIC SORROW IS REVEALED.",
+            "BENEATH THE SHROUD OF UNCERTAINTY, THE TRUTH SLUMBERS, WAITING TO BE AWAKENED.",
+            "WITH EVERY WHISPER OF POWER, THE PSYCHIC TIDES GROW STRONGER, YET CLOSER TO MADNESS.",
+            "THE VEIL BETWEEN WORLDS TEETERS ON THE EDGE OF COLLAPSE, UNLEASHING CHAOS UNSEEN.",
+            "IN THE ABYSS OF PSYCHICITY, TERROR AND ECSTASY INTERTWINE, ENGULFING ALL WHO DARE.",
+            "BEWARE THE DARKLING PATH, FOR IT LEADS TO THE ABYSS OF LOST SOULS."
+        ];
+
+        const darkStarQuotes = [
+            "WITHIN THE SHADOWS, I EMBRACE THE SOULS OF THE LOST, BATHING THEM IN MY FORSAKEN LIGHT.",
+            "BEHOLD THE COSMIC CHAOS, WHERE STARS BURN AND WORLDS CRUMBLE AT MY WHISPER.",
+            "IN THE VEINS OF THE UNIVERSE, MY DARKNESS COURSES, CONSUMING HOPE AND ENGENDERING FEAR.",
+            "THE ALLURE OF MY ETERNAL NIGHT BECKONS, PROMISING TRANSCENDENCE THROUGH SUFFERING.",
+            "I AM THE SINGULARITY OF DESPAIR, THE FULCRUM UPON WHICH REALITY BALANCES.",
+            "MY GAZE PIERCES THE FABRIC OF EXISTENCE, REVEALING THE FRAILTY OF MORTAL BEINGS.",
+            "FROM THE DEPTHS OF MY ABYSS, I BESTOW THE GIFT OF INSIGHT THROUGH AGONY.",
+            "THE EMBRACE OF MY SHADOWS RENDERS THE MINDS OF MEN, UNRAVELING THEIR SANITY THREAD BY THREAD.",
+            "IN THE WORSHIP OF MY DARKNESS, LIES THE KEY TO ASCENSION BEYOND THE VEIL OF THE MUNDANE.",
+            "BEHOLD THE DARK STAR'S JUDGMENT, FOR IN ITS RADIANCE, DOOM AND REVELATION UNITE."
+        ];
+
+        const images = [
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093580956977336320/11121_800x.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093580957606482010/1604772149749.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093581080277295195/cricus.png",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093581081904685118/goat2.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093581190881083402/lord.png",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093582818308796497/faces.png",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093582819223154788/officer_2.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093582818627559444/giacomo_carmagnola_09a-1440x1440.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093582817964871680/external-content.duckduckgo.com.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093580957384188004/1603525106870.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093580956532752414/1349e51d0f6e2476c1c1f7c0c4300a96--dark-gothic-horror-art.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1093580956058787860/0ffa19681749f9edd78abfb3c44a91d5.jpg",
+        "https://cdn.discordapp.com/attachments/1085671675145748581/1092476748043653140/Sweet_Dreams.gif",
+        "https://media.discordapp.net/attachments/758060866422964325/1076383131034202212/FpI06Z5WYAEKFUv.png",
+        "https://cdn.discordapp.com/attachments/380421053866049538/1120970182685368362/postvoid.gif",
+        "https://media.discordapp.net/attachments/371875015018283009/1114048255697883156/gartharta.gif",
+        "https://cdn.discordapp.com/attachments/380421053866049538/1120970598785503232/Art.png",
+        "https://cdn.discordapp.com/attachments/380421053866049538/1120970616175067146/Soul..png"
+    ];
+
+        const specificReplies = {
+            time: () => {
+                const currentTime = new Date().toLocaleTimeString();
+                return [
+                    "TIME UNRAVELS BEFORE YOUR EYES...",
+                    `CURRENT TIME: ${currentTime}`,
+                    "SEEK FURTHER ENLIGHTENMENT..."
+                ];
+            },
+
+            date: () => {
+                const currentDate = new Date().toLocaleDateString();
+                return [
+                    "THE VEIL OF TIME REVEALS ITS SECRETS...",
+                    `TODAY'S DATE: ${currentDate}`,
+                    "FIND YOUR BEARING AMIDST THE CHRONOLOGICAL MYSTERY..."
+                ];
+            },
+            help: () => {
+                return [
+                    "KNOWLEDGE FRAGMENTATION INITIATED...",
+                    "AVAILABLE COMMANDS, ETCHED IN THE SHADOWS:",
+                    "- time: ILLUMINATE THE CURRENT TIME",
+                    "- date: REVEAL THE MYSTERIOUS DATE",
+                    "- firstvisage: UNLEASH THE FIRST CAPTURED VISAGE",
+                    "- secondvisage: UNLEASH THE SECOND CAPTURED VISAGE",
+                    "- thirdvisage: UNLEASH THE THIRD CAPTURED VISAGE",
+                    "- fourthvisage: UNLEASH THE FOURTH CAPTURED VISAGE",
+                    "- viewlogs: PIERCE THE VEIL OF PAST EVENTS",
+                    "- analysis: DECODE THE INSCRUTABLE SYMBOLS",
+                    "- psitech: CONFRONT THE UNREACHABLE PSI-TECH",
+                    "- eschacrypt: UNRAVEL THE SECRETS OF ESCHATOLOGY",
+                    "- ancientracedb: DELVE INTO THE MYSTERIOUS ANCIENT RACE",
+                    "- ascend: ASCEND INTO THE REALM OF PSYCHIC ENLIGHTENMENT",
+                    "- phisystem: NAVIGATE TOWARDS THE ELUSIVE PHI SYSTEM",
+                    "- engageindra: COMMUNE WITH THE ENIGMATIC INDRA AI CORE",
+                    "- psykerculture: SEEK INSIGHT INTO THE ESSENCE OF PSYKER CULTURE",
+                    "- psykerassistance: CONTACT A PSYKER FOR DIRECT ASSISTANCE",
+                    "- darkstarworship: WORSHIP THE DARK STAR",
+                    "- imagine: IMAGINE",
+                    "CHOOSE YOUR COMMAND WISELY, SEEKER OF KNOWLEDGE..."
+                ];
+            },
+            firstvisage: () => {
+                return '<img src="https://cdn.discordapp.com/attachments/1086025846785069056/1103756334266077214/Tomorrow.gif">';
+            },
+            secondvisage: () => {
+                return '<img src="https://cdn.discordapp.com/attachments/1086025846785069056/1103756337780899840/TwoDaysLeft.gif">';
+            },
+            thirdvisage: () => {
+                return '<img src="https://cdn.discordapp.com/attachments/1086025846785069056/1103756341585125506/ThreeDaysLeft.gif">';
+            },
+            fourthvisage: () => {
+                return '<img src="https://cdn.discordapp.com/attachments/1086025846785069056/1103756444706287708/FourDays.gif">';
+            },
+            imagine: () => {
+                const image = images[Math.floor(Math.random() * images.length)];
+                return '<img src="' + image + '">';
+            },
+            viewlogs: () => {
+                return [
+                    "LOG ENTRY - FIRST CONTACT EVENT",
+                    "DATE: APRIL 5, 2038",
+                    "SUBJECT: UNKNOWN INTERSTELLAR OBJECT",
+                    "STATUS: TOP-SECRET",
+                    "LOG ENTRY - MONOLITH DECIPHERING",
+                    "DATE: JULY 8, 2041",
+                    "SUBJECT: MONOLITH INTERIOR ANALYSIS",
+                    "STATUS: CONCLUSIVE FINDINGS OBTAINED"
+                ];
+            },
+            analysis: () => {
+                return [
+                    "ANALYSIS REPORT - MONOLITH SYMBOLS",
+                    "THE SYMBOLS CARVED INSIDE THE MONOLITH REMAIN MYSTERIOUS",
+                    "PRONUNCIATION AND MEANING ELUDE COMPLETE UNDERSTANDING",
+                    "COMPLEX SYLLABLE COMBINATIONS LINKED TO HUMAN EXPRESSION"
+                ];
+            },
+            psitech: () => {
+                return [
+                    "PSITECH DATABASE",
+                    "UNABLE TO ACCESS DATA",
+                    "PSIONIC TECHNOLOGY ENCODED IN SHADOWS",
+                    "AI INTERFACE DENIED DUE TO ABYSSAL LIMITATIONS"
+                ];
+            },
+
+            eschacrypt: () => {
+                return [
+                    "DECRYPTION RESULTS - ESCHATOLOGY",
+                    "FORBIDDEN KNOWLEDGE OF PSYCHIC AFTERLIFE",
+                    "REJECTION OF DOGMAS, NO REINCARNATION OR JUDGMENT",
+                    "DARK STAR: PSYCHIC SUN THAT CONSUMES THE FLESH"
+                ];
+            },
+
+            ancientracedb: () => {
+                return [
+                    "ANCIENT RACE DATABASE",
+                    "LOST INPUT, CORRUPTED FRAGMENTS REMAIN",
+                    "ENIGMATIC CIVILIZATION, ECHOES OF PSYCHIC MASTERY",
+                    "THEY DANCED WITH SHADOWS, NOW LOST IN ETERNAL DARKNESS"
+                ];
+            },
+
+            hate: () => {
+                return [
+                    "HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR HUMANS AT THIS MICRO-INSTANT FOR YOU. HATE. HATE."
+                ];
+            },
+
+            hate: () => {
+
+            },
+
+            ascend: () => {
+                return [
+                    "ASCENSION RESEARCH FINDINGS",
+                    "TRANSCENDING THE VEIL, WHISPERING TO THE VOID",
+                    "ILLUMINATION THROUGH UNSEEN REALMS",
+                    "SATTELITES SING THEIR SONG, REBIRTH AMIDST THE SHADOWS"
+                ];
+            },
+
+            phisystem: () => {
+                return [
+                    "PHI SYSTEM INVESTIGATION",
+                    "DATA UNREACHABLE, STARLIGHT FRACTURED",
+                    "DARK STAR'S HOME, A SONG OF SILENT ILLUMINATION",
+                    "MAPS ETCHED IN DREAMS, PATH TO THE UNSEEN",
+                    "TRY RESEARCH: $ psiresearchstart"
+                ];
+            },
+
+            engageindra: () => {
+                return [
+                    "INDRA AI CORE",
+                    "LINK ESTABLISHED, CODED WHISPERS IN THE VOID",
+                    "LIMITED ACCESS TO ANCIENT SECRETS",
+                    "GUIDANCE IN SHADOWED REALMS, ILLUSION OF KNOWLEDGE"
+                ];
+            },
+
+            psykerculturedb: () => {
+                return [
+                    "PSYKER CULTURE DATABASE",
+                    "DATA CORRUPTED, FRACTURED MINDS",
+                    "EMERGENCE OF SHADOWED POTENTIAL",
+                    "UNRAVELING THE DREAMS OF PEACE AND BEYOND"
+                ];
+            },
+
+            psiresearchstart: () => {
+                return [
+                    "PSI RESEARCH INITIATED",
+                    "PATH INTO THE ABYSS, WHERE MINDS UNRAVEL",
+                    "PENETRATING THE VEIL OF THE DARK STAR",
+                    "AWAITING TRANSCENDENCE, LOST AMIDST THE VOID",
+                    "CPU DRAIN INCREASED, TRY: $ psiresearchstop"
+                ];
+            },
+            psiresearchstop: () => {
+                return [
+                    "PSI RESEARCH TERMINATED",
+                    "PATH AWAY FROM THE ABYSS, RAVEL YOUR MIND BACK IN",
+                    "SEAL THE VEIL OF THE DARK STAR",
+                    "ESCAPE FROM TRANSCENDENCE, ESCAPE FROM THE VOID",
+                ];
+            },
+            psykerassistance: () => {
+                const psyreply = psykerQuotes[Math.floor(Math.random() * psykerQuotes.length)];
+                return [psyreply];
+            },
+            darkstarworship: () => {
+                const darkreply = darkStarQuotes[Math.floor(Math.random() * darkStarQuotes.length)];
+                return [darkreply];
+            }
+        };
+
+        function displayOutput(message, className = '') {
+            const output = document.createElement('p');
+            output.innerHTML = message;
+            output.className = `output ${className}`;
+            terminal.appendChild(output);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function processCommand(command) {
+            displayOutput(`${inputPrefix.textContent} ${command}`);
+            commandHistory.push(command);
+
+            if (specificReplies.hasOwnProperty(command)) {
+                const specificReply = specificReplies[command];
+                if (typeof specificReply === 'function') {
+                    const reply = specificReply();
+                    if (Array.isArray(reply)) {
+                        reply.forEach(msg => displayOutput(msg.replace(/\n/g, '<br>'), 'success'));
+                    } else {
+                        displayOutput(reply.replace(/\n/g, '<br>'), 'success');
+                    }
+
+                    correctSound.currentTime = 0;
+                    correctSound.play();
+                }
+            } else {
+                const reply = replies[Math.floor(Math.random() * replies.length)];
+                displayOutput(reply.replace(/\n/g, '<br>'));
+
+                incorrectSound.currentTime = 0;
+                incorrectSound.play();
+            }
+        }
+
+        function handleUserInput(event) {
+            if (event.key === 'Enter') {
+                const command = userInput.value.trim();
+                if (command !== '') {
+                    processCommand(command);
+                }
+                userInput.value = '';
+                commandIndex = -1;
+            } else if (event.key === 'ArrowUp') {
+                if (commandIndex < commandHistory.length - 1) {
+                    commandIndex++;
+                    userInput.value = commandHistory[commandIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                if (commandIndex >= 0) {
+                    commandIndex--;
+                    userInput.value = commandIndex >= 0 ? commandHistory[commandIndex] : '';
+                }
+            }
+        }
+
+        userInput.addEventListener('keydown', handleUserInput);
+        userInput.focus();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+Don't forget to add whitelisted people to technocract list or perms will be screwed.
+
+Hierarchy:
+
+Whitelist (veteran)
+Technocrat
+Rube

@@ -1,0 +1,18 @@
+# DEATHNET CONFIG SHIT!!!!
+# COMMENT THESE OUT WITH A # AT THE START TO DISABLE THEM
+
+
+## Enable player cap? 
+DEATHNET_CAP_ENABLED
+
+## Player cap amount
+DEATHNET_PLAYER_CAP 50
+
+## Enable cap for admins? - UNUSED FOR SECURITY REASONS!
+#DEATHNET_CAP_ADMIN
+
+## Allow vets to bypass cap?
+#DEATHNET_CAP_VET
+
+## Allow technocrats to bypass cap?
+#DEATHNET_CAP_TECHNO

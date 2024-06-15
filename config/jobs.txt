@@ -1,0 +1,77 @@
+Minister=1
+Advisor=1
+Informant=1
+
+Authority Chief=1
+Authorityman=5
+Watchman=6
+
+Maintenance Chief=1
+Maintainer=3
+Operational Apprentice=2
+
+Lieutenant=1
+Hostess=3
+Candyman=1
+
+Advocate=1
+Practitioner=3
+Commerce Liaison=1
+Gazer=1
+
+Worker=54
+Psyker=4
+
+### REAL JOBS = 32 SLOTS
+### SCUM = 24 WORKERS + 4 PSYKERS + 30 WORKER RESPAWN SLOTS
+
+### TOTAL = 60 SLOTS + 30 WORKER RESPAWN SLOTS
+
+### REAL JOB SPAWN FLAGS == JOB SLOTS
+### PSYKER SPAWN FLAGS = 4 , WORKER SPAWN FLAGS = 15
+
+
+
+
+
+
+
+
+
+Captain=1
+Head of Personnel=1
+Head of Security=1
+Chief Engineer=1
+Research Director=1
+Chief Medical Officer=1
+
+Station Engineer=5
+Roboticist=1
+
+Medical Doctor=5
+Geneticist=2
+Virologist=1
+
+Scientist=3
+Chemist=2
+
+Bartender=1
+Botanist=2
+Chef=1
+Janitor=1
+Quartermaster=1
+Shaft Miner=3
+
+Warden=1
+Detective=1
+Security Officer=5
+
+Assistant=-1
+Atmospheric Technician=4
+Cargo Technician=3
+Chaplain=1
+Lawyer=2
+Librarian=1
+
+AI=1
+Cyborg=1
